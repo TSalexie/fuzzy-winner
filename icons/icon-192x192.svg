@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#45a049;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="192" height="192" rx="28.799999999999997" fill="url(#grad)"/>
+
+  <g transform="translate(96,96)">
+    <ellipse cx="1.8810574834903343e-15" cy="-30.72" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(-90 1.8810574834903343e-15 -30.72)"/>
+    <ellipse cx="21.72232031805074" cy="-21.722320318050738" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(-45 21.72232031805074 -21.722320318050738)"/>
+    <ellipse cx="30.72" cy="0" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(0 30.72 0)"/>
+    <ellipse cx="21.72232031805074" cy="21.722320318050738" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(45 21.72232031805074 21.722320318050738)"/>
+    <ellipse cx="1.8810574834903343e-15" cy="30.72" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(90 1.8810574834903343e-15 30.72)"/>
+    <ellipse cx="-21.722320318050738" cy="21.72232031805074" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(135 -21.722320318050738 21.72232031805074)"/>
+    <ellipse cx="-30.72" cy="3.762114966980669e-15" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(180 -30.72 3.762114966980669e-15)"/>
+    <ellipse cx="-21.722320318050745" cy="-21.722320318050738" rx="15.36" ry="23.04" fill="#FFE4E1" opacity="0.9" transform="rotate(225 -21.722320318050745 -21.722320318050738)"/>
+    
+    <circle cx="0" cy="0" r="13.440000000000001" fill="#FFA500"/>
+    <circle cx="0" cy="0" r="9.600000000000001" fill="#FFD700"/>
+  </g>
+
+  <g transform="translate(142.07999999999998,142.07999999999998)">
+    <circle cx="0" cy="0" r="19.200000000000003" fill="white" opacity="0.3"/>
+    <text x="0" y="5.76" font-size="15.36" font-family="Arial" font-weight="bold" text-anchor="middle" fill="white">AQ</text>
+  </g>
+</svg>
