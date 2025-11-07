@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple API Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .test-section {
+            margin: 25px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status-pass { background: #d4edda; color: #155724; }
+        .status-fail { background: #f8d7da; color: #721c24; }
+        .checklist {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .checklist h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .checklist li {
+            margin: 8px 0;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Air Quality API Test</h1>
+        <p class="subtitle">This tool tests different API request formats to identify what's working</p>
+
+        <div class="test-section">
+            <h2>Test 1: Minimal Request (Most Basic)</h2>
+            <p>Tests the API with the absolute minimum required fields</p>
+            <button onclick="test1()">Run Test 1</button>
+            <div id="result1"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 2: Standard Request (Used by diagnostic.html)</h2>
+            <p>Tests with location only, no extra computations</p>
+            <button onclick="test2()">Run Test 2</button>
+            <div id="result2"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 3: Full Request (Used by app.js)</h2>
+            <p>Tests with all extraComputations fields - this is what the app uses</p>
+            <button onclick="test3()">Run Test 3</button>
+            <div id="result3"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 4: Simplified Request with Only Important Fields</h2>
+            <p>Tests with reduced extraComputations</p>
+            <button onclick="test4()">Run Test 4</button>
+            <div id="result4"></div>
+        </div>
+
+        <div class="checklist">
+            <h3>⚠️ Before Testing - Verify Your Setup:</h3>
+            <ul>
+                <li>✅ Billing enabled: <a href="https://console.cloud.google.com/billing" target="_blank">Check here</a></li>
+                <li>✅ Air Quality API enabled: <a href="https://console.cloud.google.com/apis/library/airquality.googleapis.com" target="_blank">Check here</a></li>
+                <li>✅ API key has no HTTP referrer restrictions, OR includes <code>http://localhost:*/*</code></li>
+                <li>✅ API key restrictions allow "Air Quality API"</li>
+                <li>✅ Wait 2-3 minutes after enabling billing</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyDwCV6x16j99RnQr-1pm5KE4cA8JEX9e_M';
+        const BASE_URL = 'https://airquality.googleapis.com/v1/currentConditions:lookup';
+
+        // Test location: San Francisco
+        const TEST_LOCATION = { latitude: 37.7749, longitude: -122.4194 };
+
+        async function makeRequest(requestBody, resultId, testName) {
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.innerHTML = '<div class="result info">Testing...<div class="loading"></div></div>';
+
+            const url = `${BASE_URL}?key=${API_KEY}`;
+
+            console.log(`\n=== ${testName} ===`);
+            console.log('Request URL:', url);
+            console.log('Request Body:', JSON.stringify(requestBody, null, 2));
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const responseTime = Date.now() - startTime;
+                const responseText = await response.text();
+
+                console.log('Response Status:', response.status);
+                console.log('Response Time:', responseTime + 'ms');
+                console.log('Response:', responseText);
+
+                let result = `<strong>${testName}</strong>\n\n`;
+                result += `Status: ${response.status} ${response.statusText}\n`;
+                result += `Response Time: ${responseTime}ms\n\n`;
+
+                if (response.ok) {
+                    const data = JSON.parse(responseText);
+                    result += '✅ SUCCESS!\n\n';
+                    result += `AQI: ${data.indexes?.[0]?.aqi || 'N/A'}\n`;
+                    result += `Category: ${data.indexes?.[0]?.category || 'N/A'}\n`;
+                    result += `Pollutants: ${data.pollutants?.length || 0} found\n`;
+                    result += `Pollens: ${data.pollens?.length || 0} found\n\n`;
+                    result += 'Full Response:\n' + JSON.stringify(data, null, 2);
+
+                    resultDiv.innerHTML = `<div class="result success">${result}</div>`;
+                } else {
+                    result += '❌ FAILED\n\n';
+                    result += 'Error Response:\n' + responseText;
+
+                    // Add helpful error messages
+                    if (response.status === 403) {
+                        result += '\n\n💡 SOLUTION:\n';
+                        result += 'Error 403 usually means:\n';
+                        result += '1. Billing is not enabled (most common)\n';
+                        result += '2. API is not enabled for your project\n';
+                        result += '3. API key restrictions are too strict\n';
+                        result += '\n👉 Enable billing: https://console.cloud.google.com/billing';
+                    } else if (response.status === 400) {
+                        result += '\n\n💡 SOLUTION:\n';
+                        result += 'Error 400 means the request format is invalid.\n';
+                        result += 'This helps us narrow down which fields cause issues.';
+                    }
+
+                    resultDiv.innerHTML = `<div class="result error">${result}</div>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                const result = `<strong>${testName}</strong>\n\n❌ NETWORK ERROR\n\n${error.message}\n\nPossible causes:\n- No internet connection\n- CORS issue\n- Firewall blocking request`;
+                resultDiv.innerHTML = `<div class="result error">${result}</div>`;
+            }
+        }
+
+        // Test 1: Absolute minimum - just location
+        async function test1() {
+            const requestBody = {
+                location: TEST_LOCATION
+            };
+            await makeRequest(requestBody, 'result1', 'Test 1: Minimal Request');
+        }
+
+        // Test 2: Standard request (what diagnostic.html uses)
+        async function test2() {
+            const requestBody = {
+                location: TEST_LOCATION,
+                languageCode: "en"
+            };
+            await makeRequest(requestBody, 'result2', 'Test 2: Standard Request');
+        }
+
+        // Test 3: Full request (what app.js uses)
+        async function test3() {
+            const requestBody = {
+                location: TEST_LOCATION,
+                extraComputations: [
+                    "POLLUTANT_CONCENTRATION",
+                    "LOCAL_AQI",
+                    "HEALTH_RECOMMENDATIONS",
+                    "POLLUTANT_ADDITIONAL_INFO"
+                ],
+                languageCode: "en"
+            };
+            await makeRequest(requestBody, 'result3', 'Test 3: Full Request (app.js format)');
+        }
+
+        // Test 4: Simplified but useful
+        async function test4() {
+            const requestBody = {
+                location: TEST_LOCATION,
+                extraComputations: [
+                    "LOCAL_AQI"
+                ],
+                languageCode: "en"
+            };
+            await makeRequest(requestBody, 'result4', 'Test 4: Simplified Request');
+        }
+
+        // Check API key on load
+        window.onload = () => {
+            if (API_KEY === 'YOUR_GOOGLE_API_KEY_HERE') {
+                alert('❌ API key not configured!\n\nPlease add your Google API key to this file.');
+            } else {
+                console.log('✅ API key found:', API_KEY.substring(0, 20) + '...');
+                console.log('Ready to test! Run tests sequentially to identify which request format works.');
+            }
+        };
+    </script>
+</body>
+</html>

@@ -168,33 +168,83 @@ async function fetchAllData() {
 async function fetchAirQuality() {
     const url = `${CONFIG.AIR_QUALITY_API_URL}?key=${CONFIG.GOOGLE_API_KEY}`;
 
-    const requestBody = {
+    // Try with full request first
+    let requestBody = {
         location: {
             latitude: currentLocation.lat,
             longitude: currentLocation.lon
         },
         extraComputations: [
-            "POLLUTANT_CONCENTRATION",
             "LOCAL_AQI",
-            "HEALTH_RECOMMENDATIONS",
-            "POLLUTANT_ADDITIONAL_INFO"
+            "POLLUTANT_CONCENTRATION"
         ],
         languageCode: "en"
     };
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-    });
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
 
-    if (!response.ok) {
-        throw new Error(`Air Quality API error: ${response.status}`);
+        if (response.ok) {
+            return await response.json();
+        }
+
+        // If we get a 400 error, it might be due to extraComputations
+        // Try again with minimal request
+        if (response.status === 400) {
+            console.log('Retrying with minimal request...');
+            requestBody = {
+                location: {
+                    latitude: currentLocation.lat,
+                    longitude: currentLocation.lon
+                }
+            };
+
+            const retryResponse = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (retryResponse.ok) {
+                return await retryResponse.json();
+            }
+        }
+
+        // Get detailed error message
+        const errorText = await response.text();
+        let errorMessage = `Air Quality API error: ${response.status}`;
+
+        // Provide helpful error messages
+        if (response.status === 403) {
+            errorMessage += '\n\nThis usually means:\n';
+            errorMessage += '1. Billing is not enabled (most common)\n';
+            errorMessage += '2. API is not enabled for your project\n';
+            errorMessage += '3. API key restrictions are blocking the request\n\n';
+            errorMessage += 'Fix: Enable billing at https://console.cloud.google.com/billing';
+        } else if (response.status === 400) {
+            errorMessage += '\n\nBad Request - Check API configuration';
+        } else if (response.status === 429) {
+            errorMessage += '\n\nRate limit exceeded - Please wait a few minutes';
+        }
+
+        errorMessage += '\n\nDetails: ' + errorText;
+        throw new Error(errorMessage);
+    } catch (error) {
+        // If it's already our custom error, re-throw it
+        if (error.message.includes('Air Quality API error')) {
+            throw error;
+        }
+        // Otherwise, wrap network errors
+        throw new Error(`Network error: ${error.message}`);
     }
-
-    return await response.json();
 }
 
 async function fetchWeather() {
