@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Test - Pollen Monitor</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #00ff00;
+        }
+        h1 { color: #00ff00; }
+        .test {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #333;
+            background: #2a2a2a;
+        }
+        .pass { color: #00ff00; }
+        .fail { color: #ff0000; }
+        .warn { color: #ffaa00; }
+        .info { color: #00aaff; }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        button:hover { background: #00cc00; }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            overflow-x: auto;
+            border-left: 3px solid #00ff00;
+        }
+        .loading {
+            display: inline-block;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Pollen Monitor Diagnostic Tool</h1>
+    <p class="info">This tool will help identify what's preventing your app from working.</p>
+
+    <div class="test">
+        <h2>Test 1: API Key Check</h2>
+        <p>API Key: <span id="apiKeyStatus" class="loading">Checking...</span></p>
+        <p id="apiKeyValue"></p>
+    </div>
+
+    <div class="test">
+        <h2>Test 2: Geolocation</h2>
+        <button onclick="testGeolocation()">Test Location Access</button>
+        <p id="geoStatus"></p>
+        <pre id="geoResult"></pre>
+    </div>
+
+    <div class="test">
+        <h2>Test 3: Air Quality API (Manual Test)</h2>
+        <p>Test with coordinates: <span id="testCoords">37.7749, -122.4194 (San Francisco)</span></p>
+        <button onclick="testAirQualityAPI()">Test Air Quality API</button>
+        <p id="airQualityStatus"></p>
+        <pre id="airQualityResult"></pre>
+    </div>
+
+    <div class="test">
+        <h2>Test 4: Weather API</h2>
+        <button onclick="testWeatherAPI()">Test Weather API</button>
+        <p id="weatherStatus"></p>
+        <pre id="weatherResult"></pre>
+    </div>
+
+    <div class="test">
+        <h2>Test 5: Full Integration Test</h2>
+        <button onclick="testFullIntegration()">Run Full Test (Use Your Location)</button>
+        <p id="integrationStatus"></p>
+        <pre id="integrationResult"></pre>
+    </div>
+
+    <div class="test">
+        <h2>Common Issues & Solutions</h2>
+        <div id="solutions"></div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyDwCV6x16j99RnQr-1pm5KE4cA8JEX9e_M';
+        let userLocation = null;
+
+        // Test 1: API Key Check
+        document.getElementById('apiKeyStatus').innerHTML = API_KEY ? '<span class="pass">✓ Found</span>' : '<span class="fail">✗ Missing</span>';
+        document.getElementById('apiKeyValue').innerHTML = `<code>${API_KEY.substring(0, 20)}...${API_KEY.substring(API_KEY.length - 5)}</code>`;
+
+        // Test 2: Geolocation
+        async function testGeolocation() {
+            const status = document.getElementById('geoStatus');
+            const result = document.getElementById('geoResult');
+
+            status.innerHTML = '<span class="loading">Testing...</span>';
+            result.textContent = '';
+
+            if (!navigator.geolocation) {
+                status.innerHTML = '<span class="fail">✗ Geolocation not supported</span>';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    };
+                    status.innerHTML = '<span class="pass">✓ Location access granted</span>';
+                    result.textContent = JSON.stringify({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy + 'm'
+                    }, null, 2);
+                    document.getElementById('testCoords').textContent = `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)} (Your Location)`;
+                },
+                (error) => {
+                    status.innerHTML = '<span class="fail">✗ Location access denied or failed</span>';
+                    result.textContent = `Error: ${error.message}\nCode: ${error.code}\n\nPossible solutions:\n1. Click the location icon in your browser's address bar\n2. Allow location permissions\n3. Try in a different browser`;
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        // Test 3: Air Quality API
+        async function testAirQualityAPI() {
+            const status = document.getElementById('airQualityStatus');
+            const result = document.getElementById('airQualityResult');
+
+            status.innerHTML = '<span class="loading">Testing API...</span>';
+            result.textContent = '';
+
+            const testLat = userLocation ? userLocation.lat : 37.7749;
+            const testLon = userLocation ? userLocation.lon : -122.4194;
+
+            const url = `https://airquality.googleapis.com/v1/currentConditions:lookup?key=${API_KEY}`;
+
+            const requestBody = {
+                location: {
+                    latitude: testLat,
+                    longitude: testLon
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const responseText = await response.text();
+
+                if (response.ok) {
+                    status.innerHTML = '<span class="pass">✓ Air Quality API Working!</span>';
+                    const data = JSON.parse(responseText);
+                    result.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    status.innerHTML = `<span class="fail">✗ API Error (${response.status})</span>`;
+                    result.textContent = `HTTP ${response.status}: ${response.statusText}\n\n${responseText}\n\nPossible solutions:\n1. Check if Air Quality API is enabled: https://console.cloud.google.com/apis/library/airquality.googleapis.com\n2. Check API key restrictions in: https://console.cloud.google.com/apis/credentials\n3. Verify billing is enabled (API requires billing account)\n4. Check quota limits`;
+
+                    showSolutions(response.status);
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="fail">✗ Network Error</span>';
+                result.textContent = `Error: ${error.message}\n\nPossible solutions:\n1. Check internet connection\n2. Disable ad blockers\n3. Try in incognito mode`;
+            }
+        }
+
+        // Test 4: Weather API
+        async function testWeatherAPI() {
+            const status = document.getElementById('weatherStatus');
+            const result = document.getElementById('weatherResult');
+
+            status.innerHTML = '<span class="loading">Testing Weather API...</span>';
+            result.textContent = '';
+
+            const testLat = userLocation ? userLocation.lat : 37.7749;
+            const testLon = userLocation ? userLocation.lon : -122.4194;
+
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${testLat}&longitude=${testLon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    status.innerHTML = '<span class="pass">✓ Weather API Working!</span>';
+                    result.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    status.innerHTML = '<span class="fail">✗ Weather API Error</span>';
+                    result.textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="fail">✗ Weather API Failed</span>';
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Test 5: Full Integration
+        async function testFullIntegration() {
+            const status = document.getElementById('integrationStatus');
+            const result = document.getElementById('integrationResult');
+
+            status.innerHTML = '<span class="loading">Running full integration test...</span>';
+            result.textContent = '';
+
+            if (!userLocation) {
+                status.innerHTML = '<span class="warn">⚠ Please run Geolocation test first</span>';
+                return;
+            }
+
+            try {
+                // Test Air Quality
+                const aqResponse = await fetch(`https://airquality.googleapis.com/v1/currentConditions:lookup?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: {
+                            latitude: userLocation.lat,
+                            longitude: userLocation.lon
+                        }
+                    })
+                });
+
+                const aqData = await aqResponse.json();
+
+                // Test Weather
+                const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userLocation.lat}&longitude=${userLocation.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index`);
+                const weatherData = await weatherResponse.json();
+
+                if (aqResponse.ok && weatherResponse.ok) {
+                    status.innerHTML = '<span class="pass">✓✓✓ ALL TESTS PASSED! Your app should work!</span>';
+
+                    const summary = {
+                        location: userLocation,
+                        airQuality: {
+                            aqi: aqData.indexes?.[0]?.aqi || 'N/A',
+                            category: aqData.indexes?.[0]?.category || 'N/A',
+                            pollens: aqData.pollens?.length || 0
+                        },
+                        weather: {
+                            temperature: weatherData.current?.temperature_2m || 'N/A',
+                            humidity: weatherData.current?.relative_humidity_2m || 'N/A',
+                            windSpeed: weatherData.current?.wind_speed_10m || 'N/A'
+                        }
+                    };
+
+                    result.textContent = JSON.stringify(summary, null, 2);
+                } else {
+                    status.innerHTML = '<span class="fail">✗ Integration test failed</span>';
+                    result.textContent = `Air Quality Status: ${aqResponse.status}\nWeather Status: ${weatherResponse.status}\n\n` + JSON.stringify({ aqData, weatherData }, null, 2);
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="fail">✗ Integration test error</span>';
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function showSolutions(statusCode) {
+            const solutions = document.getElementById('solutions');
+            let html = '';
+
+            if (statusCode === 403) {
+                html = `
+                    <h3 class="fail">Error 403: Forbidden</h3>
+                    <p><strong>Most likely cause:</strong> Billing not enabled or API restrictions too strict</p>
+                    <ol>
+                        <li><strong>Enable Billing:</strong> The Air Quality API requires a billing account (has free tier)
+                            <br>→ <a href="https://console.cloud.google.com/billing" target="_blank">Enable Billing</a>
+                        </li>
+                        <li><strong>Check API is enabled:</strong>
+                            <br>→ <a href="https://console.cloud.google.com/apis/library/airquality.googleapis.com" target="_blank">Enable Air Quality API</a>
+                        </li>
+                        <li><strong>Check API Key Restrictions:</strong>
+                            <br>→ <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Check Credentials</a>
+                            <br>→ If using HTTP referrers, make sure to include: <code>http://localhost:*/*</code>
+                        </li>
+                    </ol>
+                `;
+            } else if (statusCode === 400) {
+                html = `
+                    <h3 class="fail">Error 400: Bad Request</h3>
+                    <p>The request format is incorrect. This is likely a code issue.</p>
+                `;
+            } else if (statusCode === 429) {
+                html = `
+                    <h3 class="fail">Error 429: Too Many Requests</h3>
+                    <p>You've exceeded the API quota. Wait a few minutes and try again.</p>
+                `;
+            }
+
+            solutions.innerHTML = html;
+        }
+
+        // Auto-run basic tests on load
+        window.onload = () => {
+            console.log('Diagnostic tool loaded. Ready to test!');
+        };
+    </script>
+</body>
+</html>
