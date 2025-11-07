@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Monitor pollen levels, air quality, and weather conditions to manage your allergies">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Pollen Monitor - Allergy Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🌸 Pollen Monitor</h1>
+            <p class="subtitle">Your Personal Allergy Assistant</p>
+        </header>
+
+        <!-- Location Section -->
+        <section class="location-section">
+            <div class="location-display">
+                <span id="locationName">Finding location...</span>
+            </div>
+            <button id="locationBtn" class="btn-primary">
+                <span class="btn-icon">📍</span>
+                <span>Update Location</span>
+            </button>
+            <button id="favoritesBtn" class="btn-secondary">
+                <span class="btn-icon">⭐</span>
+                <span>Favorites</span>
+            </button>
+        </section>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading">
+            <div class="spinner"></div>
+            <p>Loading air quality data...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message hidden">
+            <p></p>
+        </div>
+
+        <!-- Main Data Display -->
+        <main id="mainContent" class="hidden">
+            <!-- Overall Status Card -->
+            <div class="card status-card">
+                <div class="card-header">
+                    <h2>Current Conditions</h2>
+                    <span id="lastUpdated" class="timestamp"></span>
+                </div>
+                <div class="overall-status">
+                    <div class="status-indicator" id="overallStatus">
+                        <div class="status-icon">😊</div>
+                        <div class="status-text">Good</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pollen Data -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>🌳 Pollen Levels</h2>
+                </div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Tree Pollen</div>
+                        <div class="data-value" id="treePollen">
+                            <span class="value">--</span>
+                            <span class="level-badge">--</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Grass Pollen</div>
+                        <div class="data-value" id="grassPollen">
+                            <span class="value">--</span>
+                            <span class="level-badge">--</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Weed Pollen</div>
+                        <div class="data-value" id="weedPollen">
+                            <span class="value">--</span>
+                            <span class="level-badge">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Air Quality -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>🌬️ Air Quality</h2>
+                </div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">AQI Index</div>
+                        <div class="data-value" id="aqiValue">
+                            <span class="value">--</span>
+                            <span class="level-badge">--</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">PM2.5</div>
+                        <div class="data-value" id="pm25Value">
+                            <span class="value">--</span>
+                            <span class="unit">μg/m³</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">PM10</div>
+                        <div class="data-value" id="pm10Value">
+                            <span class="value">--</span>
+                            <span class="unit">μg/m³</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Ozone</div>
+                        <div class="data-value" id="ozoneValue">
+                            <span class="value">--</span>
+                            <span class="unit">ppb</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Conditions -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>☀️ Weather Conditions</h2>
+                </div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Temperature</div>
+                        <div class="data-value" id="temperature">
+                            <span class="value">--</span>
+                            <span class="unit">°C</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Humidity</div>
+                        <div class="data-value" id="humidity">
+                            <span class="value">--</span>
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Wind Speed</div>
+                        <div class="data-value" id="windSpeed">
+                            <span class="value">--</span>
+                            <span class="unit">km/h</span>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">UV Index</div>
+                        <div class="data-value" id="uvIndex">
+                            <span class="value">--</span>
+                            <span class="level-badge">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="card recommendations-card">
+                <div class="card-header">
+                    <h2>💡 Recommendations</h2>
+                </div>
+                <ul id="recommendations" class="recommendations-list">
+                    <li>Update your location to get personalized recommendations</li>
+                </ul>
+            </div>
+
+            <!-- Hourly Forecast -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📊 Hourly Forecast</h2>
+                </div>
+                <div id="hourlyForecast" class="hourly-forecast">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Favorites Modal -->
+        <div id="favoritesModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⭐ Favorite Locations</h2>
+                    <button id="closeFavoritesBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <button id="addFavoriteBtn" class="btn-primary full-width">
+                        Add Current Location
+                    </button>
+                    <div id="favoritesList" class="favorites-list">
+                        <p class="empty-state">No favorite locations yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>Data from Google Air Quality & Weather APIs</p>
+            <p class="install-prompt" id="installPrompt">
+                <button id="installBtn" class="btn-install">📱 Install App</button>
+            </p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
