@@ -5,7 +5,7 @@
  * Tests different request formats to identify what works
  */
 
-const API_KEY = 'AIzaSyDwCV6x16j99RnQr-1pm5KE4cA8JEX9e_M';
+const API_KEY = 'AIzaSyB8aT336lZQAt-deQIevmtu1MwGcpBxVmI';
 const BASE_URL = 'https://airquality.googleapis.com/v1/currentConditions:lookup';
 
 // Test location: San Francisco

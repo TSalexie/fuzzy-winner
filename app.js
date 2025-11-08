@@ -1,7 +1,7 @@
 // Configuration
 const CONFIG = {
     // Google API Key for Air Quality API
-    GOOGLE_API_KEY: 'AIzaSyDwCV6x16j99RnQr-1pm5KE4cA8JEX9e_M',
+    GOOGLE_API_KEY: 'AIzaSyB8aT336lZQAt-deQIevmtu1MwGcpBxVmI',
     // Using Open-Meteo for weather (free, no API key needed)
     WEATHER_API_URL: 'https://api.open-meteo.com/v1/forecast',
     // Google Air Quality API
