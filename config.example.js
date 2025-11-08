@@ -4,6 +4,7 @@
 const CONFIG = {
     // Get your API key from: https://console.cloud.google.com/
     // IMPORTANT: Restrict this key in Google Cloud Console!
+    // Replace with your actual API key
     GOOGLE_API_KEY: 'YOUR_GOOGLE_API_KEY_HERE',
 
     // Using Open-Meteo for weather (free, no API key needed)
