@@ -15,7 +15,8 @@ except ImportError:
     print("Error: urllib is required")
     sys.exit(1)
 
-API_KEY = 'AIzaSyB8aT336lZQAt-deQIevmtu1MwGcpBxVmI'
+# IMPORTANT: Replace with your actual API key
+API_KEY = 'YOUR_GOOGLE_API_KEY_HERE'
 BASE_URL = 'https://airquality.googleapis.com/v1/currentConditions:lookup'
 
 # Test location: San Francisco

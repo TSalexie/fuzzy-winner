@@ -9,6 +9,11 @@ yarn-error.log*
 .env.local
 .env.production
 
+# API Keys and sensitive config
+config.js
+api-key.txt
+**/config.local.js
+
 # Editor directories and files
 .vscode/
 .idea/

@@ -1,5 +1,18 @@
 # API Key Security Guide 🔒
 
+## Important: Setting Up Your API Key
+
+This app requires a **Google Cloud API key** to access the Air Quality API. For security reasons, API keys are **not included in this repository** - you must create and add your own.
+
+## 🔑 Quick Setup
+
+1. **Create your API key** following the instructions in `GOOGLE-CLOUD-SETUP.md`
+2. **Add your key** to `app.js` (line 6)
+3. **Don't commit the key** to git - keep it in your local copy only
+4. **Restrict your key** in Google Cloud Console (see below)
+
+---
+
 ## Important: Understanding Client-Side API Keys
 
 For a **client-side PWA** (Progressive Web App) that runs entirely in the browser, the API key **must be included in the code** for the app to work. This is normal and expected for this type of application.
@@ -84,7 +97,28 @@ If you suspect unauthorized use:
 2. **Create a new key**
 3. Add restrictions immediately
 4. Update your `app.js` with the new key
-5. Push to GitHub
+5. **Do NOT commit your new key to git**
+
+## ⚠️ Never Commit API Keys to Git
+
+This repository is configured to keep API keys out of version control:
+
+**What's Protected:**
+- `app.js`, `diagnostic.html`, `api-test.html`, `test-api.py`, `test-api.js` all have placeholder values
+- `.gitignore` excludes `config.js` and other config files
+- You add your own key locally and **don't commit it**
+
+**Before Committing:**
+```bash
+# Check what you're about to commit
+git diff
+
+# Make sure you see 'YOUR_GOOGLE_API_KEY_HERE', not your real key
+grep -n "GOOGLE_API_KEY" app.js
+
+# If you see your real key, reset the file:
+git checkout app.js
+```
 
 ## 💡 Best Practices
 
